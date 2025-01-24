@@ -1,0 +1,411 @@
+[
+    {
+        "id": "35e796763720f271",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a685e7f428035db1",
+        "type": "mqtt-broker",
+        "name": "EMQX",
+        "broker": "${LOAD_BALANCER_DNS_NAME}",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "8157dfd089954252",
+        "type": "postgreSQLConfig",
+        "name": "TimescaleDB",
+        "host": "${LOAD_BALANCER_DNS_NAME}",
+        "hostFieldType": "str",
+        "port": "5432",
+        "portFieldType": "num",
+        "database": "gis_db",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": "10",
+        "maxFieldType": "num",
+        "idle": "1000",
+        "idleFieldType": "num",
+        "connectionTimeout": "10000",
+        "connectionTimeoutFieldType": "num",
+        "user": "admin",
+        "userFieldType": "str",
+        "password": "admin",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "fb8c900818b9d00b",
+        "type": "influxdb",
+        "hostname": "${LOAD_BALANCER_DNS_NAME}",
+        "port": 8086,
+        "protocol": "http",
+        "database": "mqtt_data",
+        "name": "InfluxDB",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://tf-lb-20250114085516620300000014-46ac2d4351c2a7dc.elb.eu-west-1.amazonaws.com:8086/",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "592b4e3c2a60cc26",
+        "type": "global-config",
+        "name": "global-config",
+        "env": [
+            {
+                "name": "LOAD_BALANCER_DNS_NAME",
+                "value": "LOAD_BALANCER_DNS_NAME",
+                "type": "env"
+            }
+        ]
+    },
+    {
+        "id": "de4ba95c827e7f6c",
+        "type": "mqtt in",
+        "z": "35e796763720f271",
+        "name": "Sub MQTT /#",
+        "topic": "/#",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "a685e7f428035db1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 670,
+        "y": 360,
+        "wires": [
+            [
+                "788736ae1b28d3cb",
+                "a0765d541010b180"
+            ]
+        ]
+    },
+    {
+        "id": "e65e0c094dca972c",
+        "type": "postgresql",
+        "z": "35e796763720f271",
+        "name": "Read TimescaleDB",
+        "query": "SELECT *\nFROM mqtt_data\nWHERE topic = '/test'\nORDER BY event_timestamp;",
+        "postgreSQLConfig": "8157dfd089954252",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 490,
+        "y": 540,
+        "wires": [
+            [
+                "f9ff1b9aa66c1fe3"
+            ]
+        ]
+    },
+    {
+        "id": "b166710a29167a20",
+        "type": "inject",
+        "z": "35e796763720f271",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 540,
+        "wires": [
+            [
+                "e65e0c094dca972c"
+            ]
+        ]
+    },
+    {
+        "id": "f9ff1b9aa66c1fe3",
+        "type": "debug",
+        "z": "35e796763720f271",
+        "name": "data from SQL",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "788736ae1b28d3cb",
+        "type": "debug",
+        "z": "35e796763720f271",
+        "name": "Mqtt Messages Debug",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 940,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "b17f6658d688e5fe",
+        "type": "inject",
+        "z": "35e796763720f271",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "/test",
+        "payload": "",
+        "payloadType": "date",
+        "x": 260,
+        "y": 240,
+        "wires": [
+            [
+                "bd3c77a094a7da5c"
+            ]
+        ]
+    },
+    {
+        "id": "bd3c77a094a7da5c",
+        "type": "function",
+        "z": "35e796763720f271",
+        "name": "function 1",
+        "func": "// Generate random values for gas, temperature, humidity, and pressure\nconst gas = (Math.random() * 100).toFixed(2);          // Gas level in arbitrary units\nconst temperature = (Math.random() * 35 + 15).toFixed(2); // Temperature in °C (15°C to 50°C)\nconst humidity = (Math.random() * 50 + 30).toFixed(2); // Humidity in % (30% to 80%)\nconst pressure = (Math.random() * 20 + 980).toFixed(2); // Pressure in hPa (980 to 1000 hPa)\n\n// Create the payload structure\nmsg.payload = {\n    timestamp: msg.payload,\n    gas: parseFloat(gas),\n    temperature: parseFloat(temperature),\n    humidity: parseFloat(humidity),\n    pressure: parseFloat(pressure)\n};\n\n// Return the message object\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 240,
+        "wires": [
+            [
+                "87b4beda4f0dfce3"
+            ]
+        ]
+    },
+    {
+        "id": "87b4beda4f0dfce3",
+        "type": "mqtt out",
+        "z": "35e796763720f271",
+        "name": "Pub MQTT /test",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "a685e7f428035db1",
+        "x": 680,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "73dd8e562129aa0a",
+        "type": "function",
+        "z": "35e796763720f271",
+        "name": "function 3",
+        "func": "// Access the environment variable from the global context\nconst loadBalancerDNS = global.get('env').LOAD_BALANCER_DNS_NAME;\n\n// If the variable is undefined, set a default value\nmsg.payload = loadBalancerDNS || \"Default_DNS_Value\";\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 820,
+        "wires": [
+            [
+                "5b5c2ed2b5458033"
+            ]
+        ]
+    },
+    {
+        "id": "f03636e95a5a2c0c",
+        "type": "inject",
+        "z": "35e796763720f271",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 820,
+        "wires": [
+            [
+                "73dd8e562129aa0a"
+            ]
+        ]
+    },
+    {
+        "id": "5b5c2ed2b5458033",
+        "type": "debug",
+        "z": "35e796763720f271",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "a0765d541010b180",
+        "type": "influxdb out",
+        "z": "35e796763720f271",
+        "influxdb": "fb8c900818b9d00b",
+        "name": "insert into InfluxDB",
+        "measurement": "test_data",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "gis",
+        "bucket": "test_bucket",
+        "x": 930,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "4b3c8eecd7aeaaa2",
+        "type": "influxdb in",
+        "z": "35e796763720f271",
+        "influxdb": "fb8c900818b9d00b",
+        "name": "Read InfluxDB",
+        "query": "from(bucket: \"test_bucket\")\n|> range(start: -1y)",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "gis",
+        "x": 480,
+        "y": 620,
+        "wires": [
+            [
+                "ac8223f036ce740c"
+            ]
+        ]
+    },
+    {
+        "id": "b11eadf2143a7750",
+        "type": "inject",
+        "z": "35e796763720f271",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 620,
+        "wires": [
+            [
+                "4b3c8eecd7aeaaa2"
+            ]
+        ]
+    },
+    {
+        "id": "ac8223f036ce740c",
+        "type": "debug",
+        "z": "35e796763720f271",
+        "name": "Data from InfluxDB",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 750,
+        "y": 620,
+        "wires": []
+    }
+]

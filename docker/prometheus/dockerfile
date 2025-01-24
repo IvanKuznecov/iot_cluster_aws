@@ -1,0 +1,29 @@
+# Use an Alpine Linux base image with Prometheus compatibility
+FROM alpine:latest
+
+# Install Prometheus and required tools
+RUN apk add --no-cache bash gettext curl tar && \
+    curl -LO https://github.com/prometheus/prometheus/releases/download/v2.47.0/prometheus-2.47.0.linux-amd64.tar.gz && \
+    tar -xzf prometheus-2.47.0.linux-amd64.tar.gz && \
+    mv prometheus-2.47.0.linux-amd64/prometheus /bin/ && \
+    mv prometheus-2.47.0.linux-amd64/promtool /bin/ && \
+    mkdir -p /etc/prometheus && \
+    rm -rf prometheus-2.47.0.linux-amd64*
+
+# Set up working directory
+WORKDIR /etc/prometheus
+
+# Copy the Prometheus template configuration file
+COPY prometheus.template.yml /etc/prometheus/prometheus.template.yml
+
+# Copy the entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /entrypoint.sh
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Expose Prometheus ports
+EXPOSE 9090

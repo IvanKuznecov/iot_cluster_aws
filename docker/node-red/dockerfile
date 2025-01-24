@@ -1,0 +1,44 @@
+# Use a lightweight base image
+FROM debian:bullseye-slim
+
+# Set environment variables for Node-RED
+ENV NODE_VERSION=20 \
+    NODE_RED_VERSION=4.0 \
+    PATH="/usr/local/bin:$PATH"
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    python3 \
+    git \
+    && curl -fsSL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Node-RED and required modules globally
+RUN npm install -g --unsafe-perm \
+    node-red@$NODE_RED_VERSION \
+    node-red-contrib-postgresql@0.14.2 \
+    node-red-contrib-prometheus-exporter@1.0.5 \
+	node-red-contrib-influxdb@0.7.0
+
+# Create a user for Node-RED
+RUN useradd -m -s /bin/bash nodered \
+    && mkdir -p /data \
+    && chown -R nodered:nodered /data
+
+USER nodered
+
+# Set the working directory
+WORKDIR /data
+
+# Copy the default flow.json (optional)
+COPY --chown=nodered:nodered flow.json /home/nodered/.node-red/flows.json
+COPY --chown=nodered:nodered settings.js /home/nodered/.node-red/settings.js
+
+# Expose the default Node-RED port
+EXPOSE 1880
+
+# Run Node-RED
+CMD ["node-red"]

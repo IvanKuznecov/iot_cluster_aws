@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus_target'
+    static_configs:
+      - targets: ['localhost:9090']
+	 
+  - job_name: 'nodered_target'
+    static_configs:
+      - targets: ['${LOAD_BALANCER_DNS_NAME}:1880']
+	  
+  - job_name: 'emqx_target'
+    static_configs:
+      - targets: ['${LOAD_BALANCER_DNS_NAME}:18083']
+
+  - job_name: 'grafana_target'
+    static_configs:
+      - targets: ['${LOAD_BALANCER_DNS_NAME}:3000']
+	 
+  - job_name: 'python-container_target'
+    static_configs:
+      - targets: ['${LOAD_BALANCER_DNS_NAME}:8000']
+	  
+  - job_name: 'timescaledb_target'
+    static_configs:
+      - targets: ['${LOAD_BALANCER_DNS_NAME}:9187']

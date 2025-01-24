@@ -1,0 +1,7 @@
+FROM timescale/timescaledb:latest-pg16
+
+# Copy initialization script(s) to the container
+COPY data/init.sql /docker-entrypoint-initdb.d/
+
+# Expose PostgreSQL port
+EXPOSE 5432
